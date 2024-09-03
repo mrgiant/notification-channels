@@ -19,9 +19,9 @@ class Whatsapp extends AbstractProvider
       
         return [
             'phone_no' => $input['phone_no'],
-            'Whatsapp_Api_Key' => $input['Whatsapp_Api_Key'],
-            'Whatsapp_Device_Id' => $input['Whatsapp_Device_Id'],
-            'Whatsapp_Host' => $input['Whatsapp_Host'],
+            'Whatsapp_Api_Key' => "",
+            'Whatsapp_Device_Id' => "",
+            'Whatsapp_Host' => "",
 
         ];
     }
