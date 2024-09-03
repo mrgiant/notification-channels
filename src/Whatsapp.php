@@ -44,7 +44,7 @@ class Whatsapp extends AbstractProvider
     {
         dispatch(function () use ($subject, $text) {
             $data = $this->notificationChannel->data;
-            $GoldenLogicWhatsapp = new GoldenLogicWhatsapp((object)$this->notificationChannel->data);
+            $GoldenLogicWhatsapp = new GoldenLogicWhatsapp($this->notificationChannel->data);
 
             if (strpos($data['phone_no'], ',') !== false) {
                 $phones = explode(',', $data['phone_no']);
@@ -65,7 +65,7 @@ class Whatsapp extends AbstractProvider
     {
         $data = $this->notificationChannel->data;
 
-        $GoldenLogicWhatsapp = new GoldenLogicWhatsapp((object)$this->notificationChannel->data);
+        $GoldenLogicWhatsapp = new GoldenLogicWhatsapp($this->notificationChannel->data);
 
         if (strpos($data['phone_no'], ',') !== false) {
             $phones = explode(',', $data['phone_no']);

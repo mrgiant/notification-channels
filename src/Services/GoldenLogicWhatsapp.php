@@ -24,18 +24,18 @@ class GoldenLogicWhatsapp
 
         if ($this->setting_general) {
 
-            if ($this->setting_general->Whatsapp_Api_Key != '') {
+            if (!empty($this->setting_general["Whatsapp_Api_Key"])) {
 
-                if (! $this->CheckSessionWhatsapp($this->setting_general->Whatsapp_Api_Key, $this->setting_general->Whatsapp_Device_Id, $this->setting_general->Whatsapp_Host)) {
+                if (! $this->CheckSessionWhatsapp($this->setting_general["Whatsapp_Api_Key"], $this->setting_general["Whatsapp_Device_Id"], $this->setting_general["Whatsapp_Host"])) {
 
                     return 'Not Sended';
                 }
 
                 if (empty($FileUrl)) {
-                    return $this->sendWhatsapp($this->setting_general->Whatsapp_Api_Key, $this->setting_general->Whatsapp_Device_Id, $this->setting_general->Whatsapp_Host, $MobileNo, $Message);
+                    return $this->sendWhatsapp($this->setting_general["Whatsapp_Api_Key"], $this->setting_general["Whatsapp_Device_Id"], $this->setting_general["Whatsapp_Host"], $MobileNo, $Message);
 
                 } else {
-                    return $this->sendWhatsappWithFile($this->setting_general->Whatsapp_Api_Key, $this->setting_general->Whatsapp_Device_Id, $this->setting_general->Whatsapp_Host, $MobileNo, $Message, $FileUrl, $FileName);
+                    return $this->sendWhatsappWithFile($this->setting_general["Whatsapp_Api_Key"], $this->setting_general["Whatsapp_Device_Id"], $this->setting_general["Whatsapp_Host"], $MobileNo, $Message, $FileUrl, $FileName);
 
                 }
 
