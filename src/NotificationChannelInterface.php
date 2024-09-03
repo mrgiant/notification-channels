@@ -10,5 +10,5 @@ interface NotificationChannelInterface
 
     public function connect(): bool;
 
-    public function sendMessage(string $subject, string $text): void;
+    public function sendMessage(string $subject, string $text): string;
 }

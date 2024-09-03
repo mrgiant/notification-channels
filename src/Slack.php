@@ -34,14 +34,16 @@ class Slack extends AbstractProvider
         return true;
     }
 
-    public function sendMessage(string $subject, string $text): void
+    public function sendMessage(string $subject, string $text): string
     {
-        dispatch(function () use ($subject, $text) {
+        
             $data = $this->notificationChannel->data;
-            Http::post($data['webhook_url'], [
+            $connect= Http::post($data['webhook_url'], [
                 'text' => '*'.$subject.'*'."\n".$text,
             ]);
-        });
+
+            return $connect->body();
+       
     }
 
     private function checkConnection(string $subject, string $text): bool

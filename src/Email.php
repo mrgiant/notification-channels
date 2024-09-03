@@ -32,9 +32,11 @@ class Email extends AbstractProvider
         return true;
     }
 
-    public function sendMessage(string $subject, mixed $text): void
+    public function sendMessage(string $subject, mixed $text): string
     {
         $data = $this->notificationChannel->data;
         Mail::to($data['email'])->send(new NotificationChannelMessage($subject, $text));
+
+        return 'Email sent successfully';
     }
 }

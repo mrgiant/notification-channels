@@ -40,9 +40,9 @@ class Whatsapp extends AbstractProvider
         return true;
     }
 
-    public function sendMessage(string $subject, string $text): void
+    public function sendMessage(string $subject, string $text): string
     {
-        dispatch(function () use ($subject, $text) {
+        
             $data = $this->notificationChannel->data;
             $GoldenLogicWhatsapp = new GoldenLogicWhatsapp($this->notificationChannel->data);
 
@@ -51,14 +51,14 @@ class Whatsapp extends AbstractProvider
 
                 foreach ($phones as $phone) {
 
-                    $GoldenLogicWhatsapp->Send($subject."\n".$text, $phone, null, null);
+                   return $GoldenLogicWhatsapp->Send($subject."\n".$text, $phone, null, null);
                 }
             } else {
 
-                $GoldenLogicWhatsapp->Send($subject."\n".$text, $data['phone_no'], null, null);
+               return $GoldenLogicWhatsapp->Send($subject."\n".$text, $data['phone_no'], null, null);
             }
 
-        });
+       
     }
 
     private function checkConnection(string $subject, string $text): bool
