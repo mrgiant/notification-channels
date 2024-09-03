@@ -11,5 +11,6 @@ abstract class AbstractProvider implements NotificationChannelInterface
     public function __construct(object $notificationChannel)
     {
         $this->notificationChannel = $notificationChannel;
+        
     }
 }

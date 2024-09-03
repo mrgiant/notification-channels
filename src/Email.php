@@ -2,8 +2,9 @@
 
 namespace Mrgiant\NotificationChannels;
 
-use App\Notifications\NotificationChannelMessage;
+
 use Illuminate\Support\Facades\Mail;
+use Mrgiant\NotificationChannels\Notifications\NotificationChannelMessage;
 
 class Email extends AbstractProvider
 {
@@ -23,6 +24,8 @@ class Email extends AbstractProvider
 
     public function connect(): bool
     {
+        $data = $this->notificationChannel->data;
+        Mail::to($data['email'])->send(new NotificationChannelMessage(__('Congratulations! 🎉'), __("You've connected your Slack to Golden Logic Cloud Panel")."\n"));
         $this->notificationChannel->connected = true;
         $this->notificationChannel->save();
 
