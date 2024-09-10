@@ -53,6 +53,6 @@ class Discord extends AbstractProvider
             'content' => '*'.$subject.'*'."\n".$text,
         ]);
 
-        return $connect->status() === 204;
+        return $connect->successful();
     }
 }
