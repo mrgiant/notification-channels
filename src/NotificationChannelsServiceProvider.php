@@ -8,7 +8,7 @@ class NotificationChannelsServiceProvider extends ServiceProvider
 {
     public function register()
     {
-        // Register services
+        //  Register services //
     }
 
     public function boot()
