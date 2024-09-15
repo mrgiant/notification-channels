@@ -18,6 +18,13 @@
     ],
     "homepage": "https://github.com/mrgiant/notification-channels",
 
+    "repositories": [
+  {
+    "type": "vcs",
+    "url": "https://github.com/mrgiant/notification-channels"
+  }
+],
+
     "require": {
         "php": "^8.1",
          "guzzlehttp/guzzle": "^7.8.1"
