@@ -42,17 +42,19 @@ class Discord extends AbstractProvider
                 $connect= Http::attach('file', fopen($filePath, 'r'), basename($filePath))->post($data['webhook_url'], [
                     // to set this if title not empty
 
+                    /*
                     'embeds' => [
                         [
                             'title' => $subject,
                             'description' => $text . "\n\n" . '-----',
                         ],
                     ],
+                    */
 
 
                     
-                   // 'content' => '**'.$subject.'**'."\n".$text . "\n\n" . '---',
-                    'content' => "test",
+                    'content' => '**'.$subject.'**'."\n".$text . "\n\n" . '---',
+                   // 'content' => "test",
                 ]);
                 return $connect->body();
             }
