@@ -40,7 +40,18 @@ class Discord extends AbstractProvider
            if(!empty($filePath)){
                 $data = $this->notificationChannel->data;
                 $connect= Http::attach('file', fopen($filePath, 'r'), basename($filePath))->post($data['webhook_url'], [
-                    'content' => '**'.$subject.'**'."\n".$text . "\n\n" . '---',
+                    // to set this if title not empty
+
+                    'embeds' => [
+                        [
+                            'title' => $subject,
+                            'description' => $text . "\n\n" . '---',
+                        ],
+                    ],
+
+
+                    
+                    //'content' => '**'.$subject.'**'."\n".$text . "\n\n" . '---',
                 ]);
                 return $connect->body();
             }
@@ -48,7 +59,14 @@ class Discord extends AbstractProvider
        
             $data = $this->notificationChannel->data;
             $connect= Http::post($data['webhook_url'], [
-                'content' => '**'.$subject.'**'."\n".$text . "\n\n" . '---',
+                
+                'embeds' => [
+                    [
+                        'title' => $subject,
+                        'description' => $text . "\n\n" . '---',
+                    ],
+                ],
+
             ]);
 
             return $connect->body();
