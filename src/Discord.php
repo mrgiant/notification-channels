@@ -45,14 +45,14 @@ class Discord extends AbstractProvider
                     'embeds' => [
                         [
                             'title' => $subject,
-                            'description' => $text . "\n\n" . '---',
+                            'description' => $text . "\n\n" . '-----',
                         ],
                     ],
 
 
                     
                    // 'content' => '**'.$subject.'**'."\n".$text . "\n\n" . '---',
-                    'content' => "",
+                    'content' => "test",
                 ]);
                 return $connect->body();
             }
@@ -64,7 +64,7 @@ class Discord extends AbstractProvider
                 'embeds' => [
                     [
                         'title' => $subject,
-                        'description' => $text . "\n\n" . '---',
+                        'description' => $text . "\n\n" . '-----',
                     ],
                 ],
                 'content' => "",
