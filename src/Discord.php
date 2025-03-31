@@ -34,8 +34,17 @@ class Discord extends AbstractProvider
         return true;
     }
 
-    public function sendMessage(string $subject, string $text): string
+    public function sendMessage(string $subject, string $text,?string $filePath=null): string
     {
+
+           if(!empty($filePath)){
+                $data = $this->notificationChannel->data;
+                $connect= Http::attach('file', fopen($filePath, 'r'), basename($filePath))->post($data['webhook_url'], [
+                    'content' => '*'.$subject.'*'."\n".$text,
+                ]);
+                return $connect->body();
+            }
+
        
             $data = $this->notificationChannel->data;
             $connect= Http::post($data['webhook_url'], [

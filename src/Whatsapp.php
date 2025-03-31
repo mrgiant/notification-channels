@@ -40,7 +40,7 @@ class Whatsapp extends AbstractProvider
         return true;
     }
 
-    public function sendMessage(string $subject, string $text): string
+    public function sendMessage(string $subject, string $text,?string $filePath=null): string
     {
         
             $data = $this->notificationChannel->data;
@@ -57,6 +57,8 @@ class Whatsapp extends AbstractProvider
 
                return $GoldenLogicWhatsapp->Send($subject."\n".$text, $data['phone_no'], null, null);
             }
+
+            return "";
 
        
     }
