@@ -51,7 +51,8 @@ class Discord extends AbstractProvider
 
 
                     
-                    //'content' => '**'.$subject.'**'."\n".$text . "\n\n" . '---',
+                   // 'content' => '**'.$subject.'**'."\n".$text . "\n\n" . '---',
+                    'content' => "",
                 ]);
                 return $connect->body();
             }
@@ -66,6 +67,7 @@ class Discord extends AbstractProvider
                         'description' => $text . "\n\n" . '---',
                     ],
                 ],
+                'content' => "",
 
             ]);
 
