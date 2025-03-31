@@ -53,7 +53,7 @@ class Discord extends AbstractProvider
 
 
                     
-                    'content' => '**'.$subject.'**'."\n".$text . "\n\n" . '---',
+                    'content' => $subject."\n\n".$text,
                    // 'content' => "test",
                 ]);
                 return $connect->body();
@@ -66,10 +66,10 @@ class Discord extends AbstractProvider
                 'embeds' => [
                     [
                         'title' => $subject,
-                        'description' => $text . "\n\n" . '-----',
+                        'description' => $text,
                     ],
                 ],
-                'content' => "",
+                //'content' => "",
 
             ]);
 
@@ -81,7 +81,7 @@ class Discord extends AbstractProvider
     {
         $data = $this->notificationChannel->data;
         $connect = Http::post($data['webhook_url'], [
-            'content' => '*'.$subject.'*'."\n".$text,
+           'content' => $subject."\n\n".$text,
         ]);
 
         return $connect->successful();
