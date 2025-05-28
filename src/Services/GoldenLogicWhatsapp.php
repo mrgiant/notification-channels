@@ -189,8 +189,9 @@ class GoldenLogicWhatsapp
             default:
                 return 'application/octet-stream'; // fallback MIME type for unknown file types
         }
-    }
-
+    }   
+    
+    
     public function CheckSessionWhatsapp($api_key, $Device_Id, $Whatsapp_Host)
     {
 
@@ -198,7 +199,19 @@ class GoldenLogicWhatsapp
             'Content-Type' => 'application/json',
         ])->get('https://whatsapp.golden-logic.com/sessions/status/'.$Device_Id.'?api_key='.$api_key);
 
-        $data = $response->json()['data'];
+        // Check if response is successful and contains valid JSON
+        if (!$response->successful()) {
+            return false;
+        }
+
+        $responseData = $response->json();
+        
+        // Check if the response JSON is valid and contains the expected structure
+        if ($responseData === null || !isset($responseData['data'])) {
+            return false;
+        }
+
+        $data = $responseData['data'];
 
         if (! empty($data['valid_session'])) {
             if ($data['valid_session']) {
