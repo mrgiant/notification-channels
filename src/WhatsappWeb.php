@@ -2,8 +2,9 @@
 
 namespace Mrgiant\NotificationChannels;
 
+use Mrgiant\NotificationChannels\Services\GoldenLogicWhatsapp;
 
-class Whatsapp extends AbstractProvider
+class WhatsappWeb extends AbstractProvider
 {
     public function validationRules(): array
     {
@@ -18,7 +19,10 @@ class Whatsapp extends AbstractProvider
       
         return [
             'phone_no' => $input['phone_no'],
-            'whatsapp_Token' => "",
+            'Whatsapp_Api_Key' => "",
+            'Whatsapp_Device_Id' => "",
+            'Whatsapp_Host' => "",
+
         ];
     }
 
@@ -36,11 +40,17 @@ class Whatsapp extends AbstractProvider
         return true;
     }
 
-    public function sendMessage(string $subject, string $text,?string $filePath=null): string
+    public function sendMessage(string $subject, string $text,?string $fileURL=null): string
     {
         
             $data = $this->notificationChannel->data;
+            $GoldenLogicWhatsapp = new GoldenLogicWhatsapp($this->notificationChannel->data);
+
            
+
+            return $GoldenLogicWhatsapp->Send($subject."\n".$text, $data['phone_no'], $fileURL);
+            
+
             return "";
 
        
@@ -50,7 +60,15 @@ class Whatsapp extends AbstractProvider
     {
         $data = $this->notificationChannel->data;
 
+        $GoldenLogicWhatsapp = new GoldenLogicWhatsapp($this->notificationChannel->data);
+
        
-        return "";
+
+            $connect = $GoldenLogicWhatsapp->Send($subject."\n".$text, $data['phone_no'], null, null);
+        
+
+        // $connect = $GoldenLogicWhatsapp->Send($subject . "\n" . $text, $data['phone_no'], null, null);
+
+        return $connect === 'Yes';
     }
 }

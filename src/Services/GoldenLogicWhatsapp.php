@@ -18,7 +18,7 @@ class GoldenLogicWhatsapp
         $this->setting_general = $setting_general;
         
     }
-    public function Send($Message, $MobileNo, $FileUrl, $FileName)
+    public function Send($Message, $MobileNo, $FileUrl)
     {
         
 
@@ -35,7 +35,7 @@ class GoldenLogicWhatsapp
                     return $this->sendWhatsapp($this->setting_general["Whatsapp_Api_Key"], $this->setting_general["Whatsapp_Device_Id"], $this->setting_general["Whatsapp_Host"], $MobileNo, $Message);
 
                 } else {
-                    return $this->sendWhatsappWithFile($this->setting_general["Whatsapp_Api_Key"], $this->setting_general["Whatsapp_Device_Id"], $this->setting_general["Whatsapp_Host"], $MobileNo, $Message, $FileUrl, $FileName);
+                    return $this->sendWhatsappWithFile($this->setting_general["Whatsapp_Api_Key"], $this->setting_general["Whatsapp_Device_Id"], $this->setting_general["Whatsapp_Host"], $MobileNo, $Message, $FileUrl);
 
                 }
 
@@ -76,7 +76,7 @@ class GoldenLogicWhatsapp
 
     }
 
-    public function sendWhatsappWithFile($api_key, $Device_Id, $Whatsapp_Host, $MobileNo, $message, $FileUrl, $FileName)
+    public function sendWhatsappWithFile($api_key, $Device_Id, $Whatsapp_Host, $MobileNo, $message, $FileUrl)
     {
 
         $MobileNo_value = '968'.substr($MobileNo, -8);
@@ -108,7 +108,7 @@ class GoldenLogicWhatsapp
             'delay' => '0',
             'message' => [
                 'caption' => $message,
-                'mimetype' => $this->get_mime_type_from_filename($FileName),
+                'mimetype' => $this->get_mime_type_from_filename($FileUrl),
                 'document' => [
                     'url' => asset($FileUrl),
                 ],
@@ -119,7 +119,7 @@ class GoldenLogicWhatsapp
         $response = Http::withHeaders($headers)
             ->post(''.$Whatsapp_Host.'/chats/send?id='.$Device_Id.'&api_key='.$api_key.'', $body);
 
-        Storage::disk('public')->delete($FileName);
+      //  Storage::disk('public')->delete($FileName);
         if ($response->ok()) {
             return 'Yes';
         } else {
@@ -131,8 +131,18 @@ class GoldenLogicWhatsapp
 
     }
 
-    public function get_mime_type_from_filename($filename)
+    public 
+    
+    function get_mime_type_from_filename($url)
     {
+
+       
+        $path = parse_url($url, PHP_URL_PATH);
+    
+    
+       $filename = basename($path);
+
+
         $extension = pathinfo($filename, PATHINFO_EXTENSION);
         switch ($extension) {
             // Images
@@ -197,7 +207,7 @@ class GoldenLogicWhatsapp
 
         $response = Http::withHeaders([
             'Content-Type' => 'application/json',
-        ])->get('https://whatsapp.golden-logic.com/sessions/status/'.$Device_Id.'?api_key='.$api_key);
+        ])->get($Whatsapp_Host.'/sessions/status/'.$Device_Id.'?api_key='.$api_key);
 
         // Check if response is successful and contains valid JSON
         if (!$response->successful()) {
