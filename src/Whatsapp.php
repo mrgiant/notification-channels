@@ -6,6 +6,19 @@ use Illuminate\Support\Facades\Http;
 
 class Whatsapp extends AbstractProvider
 {
+    protected ?array $lastResponse = null;
+    protected ?string $lastError = null;
+
+    public function lastError(): ?string
+    {
+        return $this->lastError;
+    }
+
+    public function lastResponse(): ?array
+    {
+        return $this->lastResponse;
+    }
+
     public function validationRules(): array
     {
         return [
@@ -173,6 +186,7 @@ class Whatsapp extends AbstractProvider
         $data = $this->notificationChannel->data;
 
         if (empty($data['whatsapp_token']) || empty($data['phone_number_id']) || empty($data['phone_no'])) {
+            $this->lastError = __('Whatsapp credentials are missing (token / phone_number_id / phone_no).');
             return false;
         }
 
@@ -190,13 +204,31 @@ class Whatsapp extends AbstractProvider
 
     private function sendRequest(array $payload)
     {
+        $this->lastError    = null;
+        $this->lastResponse = null;
+
         $data    = $this->notificationChannel->data;
         $version = $data['api_version'] ?? 'v21.0';
         $url     = "https://graph.facebook.com/{$version}/{$data['phone_number_id']}/messages";
 
-        return Http::withToken($data['whatsapp_token'])
-            ->acceptJson()
-            ->post($url, $payload);
+        try {
+            $response = Http::withToken($data['whatsapp_token'])
+                ->acceptJson()
+                ->post($url, $payload);
+        } catch (\Throwable $e) {
+            $this->lastError = $e->getMessage();
+            throw $e;
+        }
+
+        $this->lastResponse = $response->json() ?? [];
+
+        if (! $response->ok() || isset($this->lastResponse['error'])) {
+            $err             = $this->lastResponse['error'] ?? [];
+            $this->lastError = $err['message']
+                ?? ('HTTP ' . $response->status() . ' from WhatsApp Cloud API');
+        }
+
+        return $response;
     }
 
     private function normalizePhone(string $phone): string
