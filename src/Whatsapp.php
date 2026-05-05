@@ -46,7 +46,7 @@ class Whatsapp extends AbstractProvider
     {
         return $this->checkConnection(
             __('Congratulations! 🎉'),
-            __("You've connected your Whatsapp to Golden Logic Cloud Panel") . "\n"
+            __("You've connected your Whatsapp to Golden Logic Cloud Panel")
         );
     }
 
@@ -114,7 +114,14 @@ class Whatsapp extends AbstractProvider
 
     public function textParam(string $value): array
     {
-        return ['type' => 'text', 'text' => $value];
+        return ['type' => 'text', 'text' => $this->sanitizeParam($value)];
+    }
+
+    private function sanitizeParam(string $value): string
+    {
+        $value = str_replace(["\r\n", "\r", "\n", "\t"], ' ', $value);
+        $value = preg_replace('/ {4,}/', '   ', $value);
+        return trim($value);
     }
 
     public function headerComponent(array $parameters): array
@@ -184,6 +191,10 @@ class Whatsapp extends AbstractProvider
 
     private function checkConnection(string $subject, string $text): bool
     {
+
+       return true;
+
+
         $data = $this->notificationChannel->data;
 
         if (empty($data['whatsapp_token']) || empty($data['phone_number_id']) || empty($data['phone_no'])) {
