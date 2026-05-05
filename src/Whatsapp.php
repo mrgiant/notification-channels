@@ -3,6 +3,7 @@
 namespace Mrgiant\NotificationChannels;
 
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class Whatsapp extends AbstractProvider
 {
@@ -187,6 +188,12 @@ class Whatsapp extends AbstractProvider
 
         if (empty($data['whatsapp_token']) || empty($data['phone_number_id']) || empty($data['phone_no'])) {
             $this->lastError = __('Whatsapp credentials are missing (token / phone_number_id / phone_no).');
+            Log::warning('[Whatsapp] missing credentials', [
+                'channel_id'         => $this->notificationChannel->id ?? null,
+                'has_token'          => ! empty($data['whatsapp_token']),
+                'has_phone_number_id'=> ! empty($data['phone_number_id']),
+                'has_phone_no'       => ! empty($data['phone_no']),
+            ]);
             return false;
         }
 
@@ -217,6 +224,13 @@ class Whatsapp extends AbstractProvider
                 ->post($url, $payload);
         } catch (\Throwable $e) {
             $this->lastError = $e->getMessage();
+            Log::error('[Whatsapp] connection failure', [
+                'channel_id' => $this->notificationChannel->id ?? null,
+                'url'        => $url,
+                'exception'  => $e::class,
+                'message'    => $e->getMessage(),
+                'payload'    => $this->scrubPayload($payload),
+            ]);
             throw $e;
         }
 
@@ -226,9 +240,27 @@ class Whatsapp extends AbstractProvider
             $err             = $this->lastResponse['error'] ?? [];
             $this->lastError = $err['message']
                 ?? ('HTTP ' . $response->status() . ' from WhatsApp Cloud API');
+
+            Log::warning('[Whatsapp] API error', [
+                'channel_id'    => $this->notificationChannel->id ?? null,
+                'http_status'   => $response->status(),
+                'error_code'    => $err['code'] ?? null,
+                'error_subcode' => $err['error_subcode'] ?? null,
+                'error_message' => $this->lastError,
+                'fbtrace_id'    => $err['fbtrace_id'] ?? null,
+                'payload'       => $this->scrubPayload($payload),
+            ]);
         }
 
         return $response;
+    }
+
+    private function scrubPayload(array $payload): array
+    {
+        if (isset($payload['to'])) {
+            $payload['to'] = substr($payload['to'], 0, 4) . str_repeat('*', max(0, strlen($payload['to']) - 4));
+        }
+        return $payload;
     }
 
     private function normalizePhone(string $phone): string
