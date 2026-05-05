@@ -40,19 +40,132 @@ class Whatsapp extends AbstractProvider
     {
         $data = $this->notificationChannel->data;
 
-        $bodyParams = [$subject, $text];
+        $components = [];
 
-        $payload = $this->buildTemplatePayload(
-            $data['phone_no'],
+        if (! empty($filePath)) {
+            $components[] = $this->documentHeader($filePath);
+        }
+
+        $bodyParams = array_values(array_filter([$subject, $text], static fn ($v) => $v !== null && $v !== ''));
+        if (! empty($bodyParams)) {
+            $components[] = $this->bodyComponent($bodyParams);
+        }
+
+        return $this->sendTemplate(
             $data['template_name'] ?? 'cloudpanel',
             $data['language_code'] ?? 'en_us',
-            $bodyParams,
-            $filePath
+            $components
         );
+    }
 
-        $response = $this->sendRequest($data, $payload);
+    public function sendTemplate(string $templateName, string $languageCode, array $components = [], ?string $to = null): string
+    {
+        $data = $this->notificationChannel->data;
 
-        return $response->body();
+        $template = [
+            'name'     => $templateName,
+            'language' => ['code' => $languageCode],
+        ];
+
+        if (! empty($components)) {
+            $template['components'] = $components;
+        }
+
+        $payload = [
+            'messaging_product' => 'whatsapp',
+            'to'                => $this->normalizePhone($to ?? $data['phone_no']),
+            'type'              => 'template',
+            'template'          => $template,
+        ];
+
+        return $this->sendRaw($payload);
+    }
+
+    public function sendText(string $message, ?string $to = null): string
+    {
+        $data = $this->notificationChannel->data;
+
+        return $this->sendRaw([
+            'messaging_product' => 'whatsapp',
+            'to'                => $this->normalizePhone($to ?? $data['phone_no']),
+            'type'              => 'text',
+            'text'              => ['body' => $message],
+        ]);
+    }
+
+    public function sendRaw(array $payload): string
+    {
+        return $this->sendRequest($payload)->body();
+    }
+
+    public function textParam(string $value): array
+    {
+        return ['type' => 'text', 'text' => $value];
+    }
+
+    public function headerComponent(array $parameters): array
+    {
+        return ['type' => 'header', 'parameters' => $parameters];
+    }
+
+    public function bodyComponent(array $values): array
+    {
+        return [
+            'type'       => 'body',
+            'parameters' => array_map(
+                fn ($v) => is_array($v) ? $v : $this->textParam((string) $v),
+                array_values($values)
+            ),
+        ];
+    }
+
+    public function buttonComponent(int $index, string $subType, array $parameters): array
+    {
+        return [
+            'type'       => 'button',
+            'sub_type'   => $subType,
+            'index'      => (string) $index,
+            'parameters' => $parameters,
+        ];
+    }
+
+    public function documentHeader(string $url, ?string $filename = null): array
+    {
+        return $this->headerComponent([[
+            'type'     => 'document',
+            'document' => [
+                'link'     => $url,
+                'filename' => $filename ?: $this->resolveFilename($url),
+            ],
+        ]]);
+    }
+
+    public function imageHeader(string $url): array
+    {
+        return $this->headerComponent([[
+            'type'  => 'image',
+            'image' => ['link' => $url],
+        ]]);
+    }
+
+    public function videoHeader(string $url): array
+    {
+        return $this->headerComponent([[
+            'type'  => 'video',
+            'video' => ['link' => $url],
+        ]]);
+    }
+
+    public function locationHeader(float $latitude, float $longitude, ?string $name = null, ?string $address = null): array
+    {
+        $location = ['latitude' => $latitude, 'longitude' => $longitude];
+        if ($name !== null)    $location['name']    = $name;
+        if ($address !== null) $location['address'] = $address;
+
+        return $this->headerComponent([[
+            'type'     => 'location',
+            'location' => $location,
+        ]]);
     }
 
     private function checkConnection(string $subject, string $text): bool
@@ -63,71 +176,21 @@ class Whatsapp extends AbstractProvider
             return false;
         }
 
-        $payload = $this->buildTemplatePayload(
-            $data['phone_no'],
-            $data['template_name'] ?? 'cloudpanel',
-            $data['language_code'] ?? 'en_us',
-            [$subject, $text],
-            null
-        );
-
-        return $this->sendRequest($data, $payload)->ok();
-    }
-
-    private function buildTemplatePayload(
-        string $to,
-        string $templateName,
-        string $languageCode,
-        array $bodyParams = [],
-        ?string $documentUrl = null,
-        ?string $documentFilename = null
-    ): array {
-        $components = [];
-
-        if (! empty($documentUrl)) {
-            $components[] = [
-                'type'       => 'header',
-                'parameters' => [
-                    [
-                        'type'     => 'document',
-                        'document' => [
-                            'link'     => $documentUrl,
-                            'filename' => $documentFilename ?: $this->resolveFilename($documentUrl),
-                        ],
-                    ],
-                ],
-            ];
-        }
-
-        if (! empty($bodyParams)) {
-            $components[] = [
-                'type'       => 'body',
-                'parameters' => array_map(static fn ($value) => [
-                    'type' => 'text',
-                    'text' => (string) $value,
-                ], array_values($bodyParams)),
-            ];
-        }
-
-        $payload = [
+        return $this->sendRequest([
             'messaging_product' => 'whatsapp',
-            'to'                => $this->normalizePhone($to),
+            'to'                => $this->normalizePhone($data['phone_no']),
             'type'              => 'template',
             'template'          => [
-                'name'     => $templateName,
-                'language' => ['code' => $languageCode],
+                'name'       => $data['template_name'] ?? 'cloudpanel',
+                'language'   => ['code' => $data['language_code'] ?? 'en_us'],
+                'components' => [$this->bodyComponent([$subject, $text])],
             ],
-        ];
-
-        if (! empty($components)) {
-            $payload['template']['components'] = $components;
-        }
-
-        return $payload;
+        ])->ok();
     }
 
-    private function sendRequest(array $data, array $payload)
+    private function sendRequest(array $payload)
     {
+        $data    = $this->notificationChannel->data;
         $version = $data['api_version'] ?? 'v21.0';
         $url     = "https://graph.facebook.com/{$version}/{$data['phone_number_id']}/messages";
 
