@@ -114,8 +114,8 @@ class Whatsapp extends AbstractProvider
 
     public function textParam(string $value): array
     {
-       // return ['type' => 'text', 'text' => $this->sanitizeParam($value)];
-         return ['type' => 'text', 'text' =>$value];
+        return ['type' => 'text', 'text' => $this->sanitizeParam($value)];
+        
     }
 
     private function sanitizeParam(string $value): string
